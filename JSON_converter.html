@@ -1,0 +1,111 @@
+<script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+<style>
+.center {
+  margin: auto;
+  width: 650px;
+  border: 1px solid black;
+  padding: 10px;
+}
+
+</style>
+<div style="text-align:center;margin-bottom: 15px;">
+
+<h1>Log to 
+<span style="color:#4285f4">J</span>
+<span style="color:#ea4335">S</span>
+<span style="color:#fbbc05">O</span>
+<span style="color:#34a853">N</span>
+ converter</h1>
+Convert your log file data to json format (ex. input data [{key1 = value1,key2 = value2...}] ) 
+<br>
+
+
+</div>
+
+<div class="center">
+<div>
+<textarea id="inputdata" name="w3review" rows="14" cols="90"></textarea> 
+</div>
+</br>
+<div onclick="copyText()">
+<textarea id="outputjson" name="w3review" rows="14" cols="90"  style="background-color: white;border-color: #767676;" disabled></textarea> 
+</div>
+</br>
+<div>
+Is consider null as String <input type="checkbox" id="isNullAsString">
+<button style="float:right;margin-left:10px" type="button" onclick="convertIt()">Concert</button>
+<button style="float:right" type="button" onclick="clearIt()">Clear</button>
+</div>
+</div>
+
+<script>
+function copyText() {  
+  var copyText = $("#outputjson").val(); 
+if(copyText!=''){   
+  copyText.select();
+  //copyText.setSelectionRange(0, 99999); /*For mobile devices*/ 
+  document.execCommand("copy");
+  }
+}
+function clearIt(){
+$("#inputdata").val("");
+$("#outputjson").val("");
+}
+
+function addQuote(arr,i){
+var cha = ""
+if (i > 0) {
+	if (arr[i - 1] == '{' || arr[i - 1] == '[' || arr[i - 1] == ']' || arr[i - 1] == '}' || arr[i - 1] == ',' || arr[i - 1] == ':') {
+		cha = '"' + arr[i];
+	} else {
+		cha = arr[i];
+	}
+}
+if (i < arr.length) {
+	if (arr[i + 1] == '{' || arr[i + 1] == '[' || arr[i + 1] == ']' || arr[i + 1] == '}' || arr[i + 1] == ',' || arr[i + 1] == ':') {
+		cha = cha + '"';
+	} else {
+		cha = cha + ' ';
+	}
+}
+return cha;
+}
+function convertIt(){
+var isNullAsString = $("#isNullAsString").prop("checked");
+var instr = $("#inputdata").val();
+if (instr != "") {
+	instr = instr.replace(/ +(?= )/g, '');
+	instr = instr.replace(/"/gi, ' ');
+	instr = instr.replace(/=,/gi, '=null,');
+	instr = instr.replace(/= ,/gi, '=null,');
+	instr = instr.replace(/=/gi, ' : ');
+	instr = instr.replace(/,/gi, ' , ');
+	instr = instr.replace(/{/gi, ' { ');
+	instr = instr.replace(/}/gi, ' } ');
+	instr = instr.replace(/\[/gi, ' [ ');
+	instr = instr.replace(/]/gi, ' ] ');
+	instr = instr.replace(/ +(?= )/g, '');
+	instr = instr.trim();
+	var arr = instr.split(" ");
+	if (arr.length < 3) {
+		$("#outputjson").val("Error! invalid input format.");
+		return;
+	}
+	var outstr = "";
+	for (i = 0; i < arr.length; i++) {
+		if (arr[i] == '{' || arr[i] == '}' || arr[i] == '[' || arr[i] == ']') {
+			outstr += arr[i];
+			if (arr[i] == '{')
+				outstr += '\n';
+		} else if (arr[i] == ':' || arr[i] == ',') {
+			outstr += arr[i];
+		} else if (arr[i] == 'null' && !isNullAsString) {
+			outstr += arr[i];
+		} else {
+			outstr += addQuote(arr, i);
+		}
+	}
+	$("#outputjson").val(outstr);
+}
+}
+</script>
